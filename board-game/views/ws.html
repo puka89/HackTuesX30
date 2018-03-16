@@ -9,8 +9,21 @@
     ws.onopen = function () {
         console.log('websocket is connected ...')
         ws.send('connected')
-    }
+    };
     ws.onmessage = function (ev) {
-        console.log(ev);
+        let serverInfObj = JSON.parse(ev.data);
+        switch (serverInfObj.type) {
+            case "dice": {
+                diceRoll(Number(serverInfObj.value));
+            } break;
+            default: {
+                console.log("Error: no such type");
+            }
+        }
+    };
+
+    function diceRoll(dice) {
+        // vurti zarovete i displayva chisloto
+        console.log(dice);
     }
 </script>
