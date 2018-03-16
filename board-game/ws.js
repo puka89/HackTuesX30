@@ -8,7 +8,7 @@ wss.on('connection', function (ws) {
     let field = [];
     let playerOnMove = 0;
 
-    ws.send("Waiting cin game lobby");
+    // ws.send("Waiting cin game lobby");
     while (true) {
         /* if button push - new game is started */
         if (true) {
@@ -18,7 +18,9 @@ wss.on('connection', function (ws) {
             generatePlayersObj(numberOfPlayers);
             // generate field
             field = generateField();
-            
+            invokeLEDs(field);
+
+
             // game cycle
             while(true) {
                 let diceFlag = false;
@@ -40,7 +42,7 @@ wss.on('connection', function (ws) {
                 }
 
 
-                let playerPosition = getPlayerPosition();
+                playerPosition = getPlayerPosition();
                 if (diceFlag === true && playerPosition !== -1) {
                     if (playerPosition + playerDiceValue === playerPosition) {
                         /*when the dice button is clicked and the player has moved to the right place*/
@@ -65,6 +67,11 @@ wss.on('connection', function (ws) {
         }
     }
 });
+
+function invokeLEDs(field) {
+    /*Sets diod's GPIO's*/
+}
+
 
 function generatePlayersObj() {
     players = [];
@@ -111,5 +118,33 @@ function getNumberOfPlayers() {
 function generateField() {
     let result = [];
 
+    for (let i = 0; i < 10; i++) {
+        result.push(
+            {
+                color: "green",
+                owner: "game"
+            }
+        )
+    }
 
+    for (let i = 0; i < 6; i++) {
+        result.push(
+            {
+                color: "red",
+                owner: "game"
+            }
+        )
+    }
+
+    return shuffle(result);
+}
+
+/*
+* The fallowing part of code is taken from: https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array*/
+function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
 }
