@@ -28,8 +28,12 @@ wss.on('connection', function (ws) {
                 let playerDiceValue = 0;
                 
                 playerOnMove = getPlayerOnMove(playerOnMove);
+                ws.send(JSON.stringify({
+                    type: "player-information",
+                    playerToMove: playerOnMove
+                }));
                 /*one person turn*/
-                while (true)
+                while (true && diceFlag !== true)
                 /*if dice button pushed*/
                 if (true) {
                     playerDiceValue = Math.round(Math.random() * 5) + 1;
@@ -42,16 +46,20 @@ wss.on('connection', function (ws) {
                 }
 
 
-                playerPosition = getPlayerPosition();
+                // playerPosition = getPlayerPosition();
                 if (diceFlag === true && playerPosition !== -1) {
-                    if (playerPosition + playerDiceValue === playerPosition) {
+                    // if (playerPosition + playerDiceValue === getPlayerPosition()) {
+                    if (true) {
                         /*when the dice button is clicked and the player has moved to the right place*/
+                        handleCorretFieldOptions(playerPosition + playerDiceValue);
                     } else {
                         /*not on right position*/
                         penalizePlayer(playerOnMove);
                     }
+                    break;
                 } else if (playerPosition === -1){
                     /*player in air*/
+
                 }
 
 
@@ -68,6 +76,10 @@ wss.on('connection', function (ws) {
     }
 });
 
+function handleCorretFieldOptions(playerPostion) {
+
+}
+
 function invokeLEDs(field) {
     /*Sets diod's GPIO's*/
 }
@@ -76,7 +88,8 @@ function invokeLEDs(field) {
 function generatePlayersObj() {
     players = [];
     let boardInfo = getBoardInfo();
-    for (let i = 0; i < boardInfo.size; i++) {
+    // for (let i = 0; i < boardInfo.size; i++) {
+    for (let i = 0; i < 4; i++) {
         players.push(
             {
                 sensorId: 0,

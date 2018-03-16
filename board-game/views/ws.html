@@ -16,14 +16,21 @@
             case "dice": {
                 diceRoll(Number(serverInfObj.value));
             } break;
+            case "player-information": {
+                playerToMove(serverInfObj.playerToMove)
+            }break;
             default: {
                 console.log("Error: no such type");
             }
         }
     };
+    
+    function playerToMove(player) {
+        console.log("player to move: " + player);
+    }
 
     function diceRoll(dice) {
         // vurti zarovete i displayva chisloto
-        console.log(dice);
+        console.log("dice:" + dice);
     }
 </script>
