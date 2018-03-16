@@ -11,7 +11,7 @@ wss.on('connection', function (ws) {
     // ws.send("Waiting cin game lobby");
     while (true) {
         /* if button push - new game is started */
-        if (true) {
+        if (getStartButtonState() === 1) {
             // calculate the number of player / the number of jacks connected at the beginning
             numberOfPlayers = getNumberOfPlayers();
             alivePlayers = numberOfPlayers;
@@ -23,6 +23,7 @@ wss.on('connection', function (ws) {
             // game cycle
             while(true) {
                 let diceFlag = false;
+                //can be made to wait for interupt
                 let playerPosition = -1;
                 let playerDiceValue = 0;
                 
@@ -32,40 +33,38 @@ wss.on('connection', function (ws) {
                     playerToMove: playerOnMove
                 }));
                 /*one person turn*/
-                while (true && diceFlag !== true)
-                /*if dice button pushed*/
-                if (true) {
-                    playerDiceValue = Math.round(Math.random() * 5) + 1;
-                    ws.send(JSON.stringify({
-                        type: "dice",
-                        value: `${playerDiceValue}`
-                    }));
-                    diceFlag = true;
-                    playerPosition = getPlayerPosition();
-                }
-
-
-                // playerPosition = getPlayerPosition();
-                if (diceFlag === true && playerPosition !== -1) {
-                    // if (playerPosition + playerDiceValue === getPlayerPosition()) {
+                while (diceFlag !== true) {
+                    /*if dice button pushed*/
                     if (true) {
-                        /*when the dice button is clicked and the player has moved to the right place*/
-                        handleCorretFieldOptions(playerPosition + playerDiceValue, field, playerOnMove);
-                    } else {
-                        /*not on right position*/
-                        penalizePlayer(playerOnMove);
+                        playerDiceValue = Math.round(Math.random() * 5) + 1;
+                        ws.send(JSON.stringify({
+                            type: "dice",
+                            value: `${playerDiceValue}`
+                        }));
+                        diceFlag = true;
                     }
-                    break;
-                } else if (playerPosition === -1){
-                    /*player in air*/
-
                 }
 
-
+                while(true) {
+                    playerPosition = getPlayerPosition();
+                    if (playerPosition !== -1) {
+                        if (playerPosition + playerDiceValue === getPlayerPosition()) {
+                            /*when the dice button is clicked and the player has moved to the right place*/
+                            handleCorretFieldOptions(playerPosition + playerDiceValue, field, playerOnMove, ws);
+                        } else {
+                            /*not on right position*/
+                            players[playerOnMove].hp -= 2;
+                            ws.send(JSON.stringify({
+                                type: "penalty",
+                                value: `${players[playerOnMove]}`
+                            }));
+                        }
+                        break;
+                    }
+                }
 
                 if (alivePlayers === 1) {
                     // someone won
-
 
                     players = [];
                     break;
@@ -75,16 +74,35 @@ wss.on('connection', function (ws) {
     }
 });
 
-function handleCorretFieldOptions(playerPostion, field, player) {
+function handleCorretFieldOptions(playerPostion, field, player, ws) {
     let color = field[playerPostion].color;
     if(color === "red") {
         //red ask a question if answered wrong deal damage
-        askQuestion(player);
+        askQuestion(player, ws);
     }
     if(color === "green") {
         //green asks a question if answered correctly restore 1
-        askQuestion(player);
+        askQuestion(player, ws);
     }
+}
+
+function askQuestion(player, ws) {
+    // draw question from static file
+    let question
+
+    ws.send(JSON.stringify({
+        value: `${question}`
+    }))
+
+    // /accept button input
+    while(true) {
+        //if any of the 2 buttons are down
+        break;
+    }
+}
+
+function answerQuestion() {
+    //read answer buttons and send question feedback
 }
 
 function invokeLEDs(field) {
@@ -113,11 +131,8 @@ function getBoardInfo() {
     return [];
 }
 
-function penalizePlayer(playerId) {
-    players[playerId].hp -= 2;
-}
-
-function getPlayerPosition() {
+function getPlayerPosition(playerId) {
+    //read gpio with given id
     return 0;
 }
 /*ws.on('message', function (message) {
