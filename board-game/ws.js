@@ -6,6 +6,7 @@ wss.on('connection', function (ws) {
     let numberOfPlayers = 0;
     let alivePlayers = 0;
     let field = [];
+    let playerOnMove = 0;
 
     ws.send("Waiting cin game lobby");
     while (true) {
@@ -14,6 +15,7 @@ wss.on('connection', function (ws) {
             // calculate the number of player / the number of jacks connected at the beginning
             numberOfPlayers = getNumberOfPlayers();
             alivePlayers = numberOfPlayers;
+            generatePlayersObj(numberOfPlayers);
             // generate field
             field = generateField();
             
@@ -23,7 +25,7 @@ wss.on('connection', function (ws) {
                 let playerPosition = -1;
                 let playerDiceValue = 0;
                 
-                let playerOnMove = getPlayerOnMove();
+                playerOnMove = getPlayerOnMove(playerOnMove);
                 /*one person turn*/
                 while (true)
                 /*if dice button pushed*/
@@ -64,6 +66,23 @@ wss.on('connection', function (ws) {
     }
 });
 
+function generatePlayersObj() {
+    players = [];
+    let boardInfo = getBoardInfo();
+    for (let i = 0; i < boardInfo.size; i++) {
+        players.push(
+            {
+                sensorId: 0,
+            }
+        );
+    }
+}
+
+function getBoardInfo() {
+    /*Returns the S_id's and current position for them*/
+    return [];
+}
+
 function penalizePlayer(playerId) {
 
 }
@@ -76,8 +95,12 @@ function getPlayerPosition() {
             });
         */
 
-function getPlayerOnMove() {
-    return 0;
+function getPlayerOnMove(playerOnMove) {
+    if (playerOnMove + 1 > players.length - 1) {
+        return 0;
+    } else {
+        return playerOnMove + 1
+    }
 }
 
 function getNumberOfPlayers() {
