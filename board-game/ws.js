@@ -20,7 +20,6 @@ wss.on('connection', function (ws) {
             field = generateField();
             invokeLEDs(field);
 
-
             // game cycle
             while(true) {
                 let diceFlag = false;
@@ -115,7 +114,7 @@ function getBoardInfo() {
 }
 
 function penalizePlayer(playerId) {
-    players[playerId].hp -= 2; 
+    players[playerId].hp -= 2;
 }
 
 function getPlayerPosition() {
