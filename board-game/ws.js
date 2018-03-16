@@ -51,7 +51,7 @@ wss.on('connection', function (ws) {
                     // if (playerPosition + playerDiceValue === getPlayerPosition()) {
                     if (true) {
                         /*when the dice button is clicked and the player has moved to the right place*/
-                        handleCorretFieldOptions(playerPosition + playerDiceValue);
+                        handleCorretFieldOptions(playerPosition + playerDiceValue, field, playerOnMove);
                     } else {
                         /*not on right position*/
                         penalizePlayer(playerOnMove);
@@ -76,14 +76,21 @@ wss.on('connection', function (ws) {
     }
 });
 
-function handleCorretFieldOptions(playerPostion) {
-
+function handleCorretFieldOptions(playerPostion, field, player) {
+    let color = field[playerPostion].color;
+    if(color === "red") {
+        //red ask a question if answered wrong deal damage
+        askQuestion(player);
+    }
+    if(color === "green") {
+        //green asks a question if answered correctly restore 1
+        askQuestion(player);
+    }
 }
 
 function invokeLEDs(field) {
     /*Sets diod's GPIO's*/
 }
-
 
 function generatePlayersObj() {
     players = [];
@@ -92,7 +99,11 @@ function generatePlayersObj() {
     for (let i = 0; i < 4; i++) {
         players.push(
             {
+                id: i,
                 sensorId: 0,
+                hp: 10,
+                turns: 0,
+                position: 0,
             }
         );
     }
@@ -104,7 +115,7 @@ function getBoardInfo() {
 }
 
 function penalizePlayer(playerId) {
-
+    players[playerId].hp -= 2; 
 }
 
 function getPlayerPosition() {
@@ -130,20 +141,14 @@ function getNumberOfPlayers() {
 
 function generateField() {
     let result = [];
-
-    for (let i = 0; i < 10; i++) {
+    let color = 'green';
+    for (let i = 0; i < 16; i++) {
+        if (i >= 10 && color !== "red") {
+            color = "red";
+        }
         result.push(
             {
-                color: "green",
-                owner: "game"
-            }
-        )
-    }
-
-    for (let i = 0; i < 6; i++) {
-        result.push(
-            {
-                color: "red",
+                color: color,
                 owner: "game"
             }
         )
