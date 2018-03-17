@@ -1,4 +1,4 @@
-<ul></ul>
+<div id="dice-placeholder"></div>
 <script>
     var ws = new WebSocket('ws://localhost:40510');
     ws.onopen = function () {
@@ -35,7 +35,11 @@
     }
 
     function diceRoll(dice) {
-        // vurti zarovete i displayva chisloto
+        // row the dice
+        let dicePlaceholder = document.getElementById("dice-placeholder");
+        dicePlaceholder.innerHTML = (
+            dice
+        );
         console.log("dice:" + dice);
     }
 
