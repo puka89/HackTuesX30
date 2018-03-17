@@ -1,3 +1,4 @@
+"use strict";
 var WebSocketServer = require('ws').Server,
   wss = new WebSocketServer({port: 40510})
 
@@ -45,7 +46,7 @@ wss.on('connection', function (ws) {
                         oldPlayerPostion = getPlayerPosition();
                     }
                 }
-
+                break;
                 while(true) {
                     playerPosition = getPlayerPosition();
                     if (playerPosition !== -1 && oldPlayerPostion !== playerPosition) {
@@ -183,7 +184,10 @@ function generateField() {
 function shuffle(a) {
     for (let i = a.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
+        let temp = a[i];
+        a[i] = a[j];
+        a[j] = temp;
+        // [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
 }
