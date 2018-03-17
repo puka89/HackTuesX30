@@ -1,7 +1,5 @@
-
-<div id="dice-placeholder"></div>
 <script>
-    var ws = new WebSocket('ws://localhost:40510');
+    var ws = new WebSocket('ws://192.168.43.135:40510');
     ws.onopen = function () {
         console.log('websocket is connected ...')
         ws.send('connected')
@@ -36,11 +34,7 @@
     }
 
     function diceRoll(dice) {
-        // row the dice
-        let dicePlaceholder = document.getElementById("dice-placeholder");
-        dicePlaceholder.innerHTML = (
-            dice
-        );
+        // vurti zarovete i displayva chisloto
         console.log("dice:" + dice);
     }
 
