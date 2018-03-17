@@ -1,5 +1,15 @@
+"use strict";
 var WebSocketServer = require('ws').Server,
   wss = new WebSocketServer({port: 40510})
+
+var gpio = require('rpi-gpio');
+
+gpio.on('change', function (channel, value) {
+    console.log("channel: " + channel + "value is: " + value);
+})
+
+gpio.setup(40, gpio.DIR_IN, gpio.EDGE_BOTH);
+
 
 let players = [];
 wss.on('connection', function (ws) {
@@ -11,7 +21,7 @@ wss.on('connection', function (ws) {
     // ws.send("Waiting cin game lobby");
     while (true) {
         /* if button push - new game is started */
-        if (getStartButtonState() === 1) {
+        if (getStartButtonState() === true) {
             // calculate the number of player / the number of jacks connected at the beginning
             numberOfPlayers = getNumberOfPlayers();
             alivePlayers = numberOfPlayers;
@@ -26,7 +36,7 @@ wss.on('connection', function (ws) {
                 //can be made to wait for interupt
                 let playerPosition = -1;
                 let playerDiceValue = 0;
-                
+                let oldPlayerPostion = -1;
                 playerOnMove = getPlayerOnMove(playerOnMove);
                 ws.send(JSON.stringify({
                     type: "player-information",
@@ -42,12 +52,13 @@ wss.on('connection', function (ws) {
                             value: `${playerDiceValue}`
                         }));
                         diceFlag = true;
+                        oldPlayerPostion = getPlayerPosition();
                     }
                 }
-
+                break;
                 while(true) {
                     playerPosition = getPlayerPosition();
-                    if (playerPosition !== -1) {
+                    if (playerPosition !== -1 && oldPlayerPostion !== playerPosition) {
                         if (playerPosition + playerDiceValue === getPlayerPosition()) {
                             /*when the dice button is clicked and the player has moved to the right place*/
                             handleCorretFieldOptions(playerPosition + playerDiceValue, field, playerOnMove, ws);
@@ -60,6 +71,8 @@ wss.on('connection', function (ws) {
                             }));
                         }
                         break;
+                    } else {
+                        continue;
                     }
                 }
 
@@ -73,6 +86,10 @@ wss.on('connection', function (ws) {
         }
     }
 });
+
+function getStartButtonState() {
+    return true;
+}
 
 function handleCorretFieldOptions(playerPostion, field, player, ws) {
     let color = field[playerPostion].color;
@@ -176,7 +193,10 @@ function generateField() {
 function shuffle(a) {
     for (let i = a.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
+        let temp = a[i];
+        a[i] = a[j];
+        a[j] = temp;
+        // [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
 }
