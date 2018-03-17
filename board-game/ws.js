@@ -2,6 +2,15 @@
 var WebSocketServer = require('ws').Server,
   wss = new WebSocketServer({port: 40510})
 
+var gpio = require('rpi-gpio');
+
+gpio.on('change', function (channel, value) {
+    console.log("channel: " + channel + "value is: " + value);
+})
+
+gpio.setup(40, gpio.DIR_IN, gpio.EDGE_BOTH);
+
+
 let players = [];
 wss.on('connection', function (ws) {
     let numberOfPlayers = 0;
