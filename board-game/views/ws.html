@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <ul></ul>
 <script>
     var ws = new WebSocket('ws://localhost:40510');
@@ -83,3 +84,95 @@
         </tr>
     </table>
 </body>l.8
+=======
+
+<div id="dice-placeholder"></div>
+<script>
+    var ws = new WebSocket('ws://localhost:40510');
+    ws.onopen = function () {
+        console.log('websocket is connected ...')
+        ws.send('connected')
+    };
+    ws.onmessage = function (ev) {
+        let serverInfObj = JSON.parse(ev.data);
+        switch (serverInfObj.type) {
+            case "dice": {
+                diceRoll(Number(serverInfObj.value));
+            } break;
+            case "player-information": {
+                playerToMove(serverInfObj.playerToMove);
+            }break;
+            case "penalty": {
+                penalizePlayer(serverInfObj.value);
+            } break;
+            case "question": {
+                openQuestionModal(serverInfObj.value);
+            } break;
+            case "answered": {
+                closeQuestionModal();
+            }
+            default: {
+                console.log("Error: no such type");
+            }
+        }
+    };
+    
+    function playerToMove(player) {
+        //update the table with whoever's turn it is
+        console.log("player to move: " + player);
+    }
+
+    function diceRoll(dice) {
+        // row the dice
+        let dicePlaceholder = document.getElementById("dice-placeholder");
+        dicePlaceholder.innerHTML = (
+            dice
+        );
+        console.log("dice:" + dice);
+    }
+
+    function penalizePlayer(player) {
+        //reduce the health of the given player by 2
+        console.log("player " + player + "lost 2 hp due to invalid move");
+    }
+
+    function openQuestionModal(question) {
+        let modal = document.getElementById('question_modal');
+        modal.style.display = "block";
+    }
+
+    function closeQuestionModal() {
+        let modal = document.getElementById('question_modal');
+        modal.style.display = "none";
+    }
+</script>
+<body>
+    <table id="players_table">
+        <tr>
+            <th>Player Color</th>
+            <th>Lives</th>
+            <th>Turn Indicator</th>
+        </tr>
+        <tr>
+            <td>Yellow</td>
+            <td id="yellow_hp">10</td>
+            <td id="yellow_turn">My Turn</td>
+        </tr>
+        <tr>
+            <td>Purple</td>
+            <td id="purple_hp">10</td>
+            <td id="purple_turn">Awaiting</td>
+        </tr>
+        <tr>
+            <td>Brown</td>
+            <td id="brown_hp">10</td>
+            <td id="brown_turn">Awaiting</td>
+        </tr>
+        <tr>
+            <td>Pink</td>
+            <td id="pink_id">10</td>
+            <td id="pink_turn">Awaiting</td>
+        </tr>
+    </table>
+</body>
+>>>>>>> 1407080fe92c970a0275547654d6795742c8fd30
