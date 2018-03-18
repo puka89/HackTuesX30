@@ -53,32 +53,83 @@
         modal.style.display = "none";
     }
 </script>
+<style>
+    .players-box {
+        display: flex;
+        justify-content: space-around;
+    }
+
+    body {
+        background: #161616;
+    }
+
+    span {
+        display: block;
+        font-size: 40px;
+        font-family: Arial;
+        color: #cccccc;
+        padding-top: 20px;
+    }
+
+    .dice-player-on-move {
+        margin-top: 100px;
+        display: flex;
+        justify-content: space-around;
+        color: #cccccc;
+        font-family: Arial;
+    }
+
+    .player-on-move {
+        font-size: 70px;
+    }
+
+    .dice {
+        border: 3px solid #cccccc;
+        padding: 30px;
+        font-size: 100px;
+    }
+
+    /*.player_names, .player_health, .player_moves {
+        display: flex;
+        justify-content: center;
+    }*/
+</style>
 <body>
-    <table id="players_table">
-        <tr>
-            <th>Player Color</th>
-            <th>Lives</th>
-            <th>Turn Indicator</th>
-        </tr>
-        <tr>
-            <td>Yellow</td>
-            <td id="yellow_hp">10</td>
-            <td id="yellow_turn">My Turn</td>
-        </tr>
-        <tr>
-            <td>Purple</td>
-            <td id="purple_hp">10</td>
-            <td id="purple_turn">Awaiting</td>
-        </tr>
-        <tr>
-            <td>Brown</td>
-            <td id="brown_hp">10</td>
-            <td id="brown_turn">Awaiting</td>
-        </tr>
-        <tr>
-            <td>Pink</td>
-            <td id="pink_id">10</td>
-            <td id="pink_turn">Awaiting</td>
-        </tr>
-    </table>
+    <div class="players-box">
+        <div class="single-player">
+            <span class="player-name">Играч: </span>
+            <span class="player-health">Живот: </span>
+            <span class="player-move">Изиграни ходове: </span>
+        </div>
+
+        <div class="single-player">
+            <span class="player-name">Жълт</span>
+            <span class="player-health">10</span>
+            <span class="player-move">5</span>
+        </div>
+
+        <div class="single-player">
+            <span class="player-name">Лилав</span>
+            <span class="player-health">9</span>
+            <span class="player-move">4</span>
+        </div>
+
+        <div class="single-player">
+            <span class="player-name">Син</span>
+            <span class="player-health">10</span>
+            <span class="player-move">4</span>
+        </div>
+
+        <div class="single-player">
+            <span class="player-name">Бял</span>
+            <span class="player-health">8</span>
+            <span class="player-move">4</span>
+        </div>
+
+
+    </div>
+    <div class="dice-player-on-move">
+        <div class="player-on-move">Лилав</div>
+        <div class="dice">5</div>
+    </div>
 </body>
