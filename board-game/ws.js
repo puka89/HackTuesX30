@@ -15,7 +15,36 @@ var gameState = {
     lastDiceValue: 0
 };
 
+gpio.setup(9, gpio.DIR_IN, gpio.EDGE_BOTH); // dice, start
+gpio.setup(7, gpio.DIR_IN, gpio.EDGE_BOTH); // true button
+gpio.setup(8, gpio.DIR_IN, gpio.EDGE_BOTH); // false button
+gpio.setup(2, gpio.DIR_IN, gpio.EDGE_BOTH); // field_1
+gpio.setup(3, gpio.DIR_IN, gpio.EDGE_BOTH); // field_2
+gpio.setup(17, gpio.DIR_IN, gpio.EDGE_BOTH); // field_3
+gpio.setup(27, gpio.DIR_IN, gpio.EDGE_BOTH); // field_4
+gpio.setup(22, gpio.DIR_IN, gpio.EDGE_BOTH); // field_5
+gpio.setup(5, gpio.DIR_IN, gpio.EDGE_BOTH); // field_6
+gpio.setup(6, gpio.DIR_IN, gpio.EDGE_BOTH); // field_7
+gpio.setup(13, gpio.DIR_IN, gpio.EDGE_BOTH); // field_8
+gpio.setup(19, gpio.DIR_IN, gpio.EDGE_BOTH); //field_9
+gpio.setup(26, gpio.DIR_IN, gpio.EDGE_BOTH); //field_10
+gpio.setup(18, gpio.DIR_IN, gpio.EDGE_BOTH); //field_11
+gpio.setup(23, gpio.DIR_IN, gpio.EDGE_BOTH); //field_12
+gpio.setup(24, gpio.DIR_IN, gpio.EDGE_BOTH); //field_13
+gpio.setup(25, gpio.DIR_IN, gpio.EDGE_BOTH); //field_14
+gpio.setup(12, gpio.DIR_IN, gpio.EDGE_BOTH); //field_15
+gpio.setup(16, gpio.DIR_IN, gpio.EDGE_BOTH); //field_16
+
 var sensors = require('ds1820-temp');
+var gpio = require('rpi-gpio');
+
+gpio.on('change', function(channel, value) {
+    // if (channel == 9) {
+    //     /*start button dice*/
+    //     console.log("start/dice");
+    // }
+    console.log('Channel ' + channel + ' value is now ' + value);
+});
 // listDevices([cb(error, result)]);
 
 wss.on('connection', function (ws) {
@@ -33,48 +62,10 @@ wss.on('connection', function (ws) {
         console.log('Read all devices', devices);
     });
 
-/*// async version
-    sensor.list(function (err, deviceIds) {
-        if(err) {
-            console.log(err);
-        } else {
-            console.log(deviceIds);
-        }
-    });*/
-
-
     // sendAllClients();
 });
 
-// var pixel = require("node-pixel");
-// var five = require("johnny-five");
-//
-// var board = new five.Board({
-//     board: this,
-//     controller: "I2CBACKPACK",
-//     strips: [ {pin: 18, length: 1}, ], // this is preferred form for definition
-//     gamma: 2.8, // set to a gamma that works nicely for WS2812
-// });
-// var strip = null;
-//
-// board.on("ready", function() {
-//
-//     var strip = new pixel.Strip({
-//         board: this,
-//         controller: "I2CBACKPACK",
-//         strips: [ {pin: 18, length: 1}, ], // this is preferred form for definition
-//         gamma: 2.8, // set to a gamma that works nicely for WS2812
-//     });
-//
-//     strip.on("ready", function() {
-//         // do stuff with the strip here.
-//         strip.pixel(0).color('#0xffffff');
-//     });
-// });
-
 var ws281x = require('rpi-ws281x-native');
-
-
 
 var NUM_LEDS = parseInt(16),
     pixelData = new Uint32Array(NUM_LEDS);
