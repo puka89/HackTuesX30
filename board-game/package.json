@@ -4,8 +4,13 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "ds1820-temp": "^1.0.0",
     "ds18b20-raspi": "^0.2.5",
     "express": "^4.16.3",
+    "firmata": "^0.19.1",
+    "johnny-five": "^0.14.1",
+    "node-pixel": "^0.9.3",
+    "raspi-io": "^8.1.0",
     "rpi-ws281x-native": "^0.8.2",
     "ws": "^5.0.0"
   },
