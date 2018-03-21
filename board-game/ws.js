@@ -1,168 +1,123 @@
+"use strict";
 var WebSocketServer = require('ws').Server,
-  wss = new WebSocketServer({port: 40510})
+    wss = new WebSocketServer({port: 40510});
+// var sensor = require('ds18b20-raspi');
 
-let players = [];
+var gpio = require('rpi-gpio');
+var colors = ["purple", "blue", "white", "black"];
+var connectionPool = [];
+
+var gameState = {
+    started: false,
+    players: [],
+    playerOnMove: -1,
+    connectedPlayers: 0,
+    lastDiceValue: 0
+};
+
+gpio.setup(9, gpio.DIR_IN, gpio.EDGE_BOTH); // dice, start
+gpio.setup(7, gpio.DIR_IN, gpio.EDGE_BOTH); // true button
+gpio.setup(8, gpio.DIR_IN, gpio.EDGE_BOTH); // false button
+gpio.setup(2, gpio.DIR_IN, gpio.EDGE_BOTH); // field_1
+gpio.setup(3, gpio.DIR_IN, gpio.EDGE_BOTH); // field_2
+gpio.setup(17, gpio.DIR_IN, gpio.EDGE_BOTH); // field_3
+gpio.setup(27, gpio.DIR_IN, gpio.EDGE_BOTH); // field_4
+gpio.setup(22, gpio.DIR_IN, gpio.EDGE_BOTH); // field_5
+gpio.setup(5, gpio.DIR_IN, gpio.EDGE_BOTH); // field_6
+gpio.setup(6, gpio.DIR_IN, gpio.EDGE_BOTH); // field_7
+gpio.setup(13, gpio.DIR_IN, gpio.EDGE_BOTH); // field_8
+gpio.setup(19, gpio.DIR_IN, gpio.EDGE_BOTH); //field_9
+gpio.setup(26, gpio.DIR_IN, gpio.EDGE_BOTH); //field_10
+gpio.setup(18, gpio.DIR_IN, gpio.EDGE_BOTH); //field_11
+gpio.setup(23, gpio.DIR_IN, gpio.EDGE_BOTH); //field_12
+gpio.setup(24, gpio.DIR_IN, gpio.EDGE_BOTH); //field_13
+gpio.setup(25, gpio.DIR_IN, gpio.EDGE_BOTH); //field_14
+gpio.setup(12, gpio.DIR_IN, gpio.EDGE_BOTH); //field_15
+gpio.setup(16, gpio.DIR_IN, gpio.EDGE_BOTH); //field_16
+
+var sensors = require('ds1820-temp');
+var gpio = require('rpi-gpio');
+
+gpio.on('change', function(channel, value) {
+    // if (channel == 9) {
+    //     /*start button dice*/
+    //     console.log("start/dice");
+    // }
+    console.log('Channel ' + channel + ' value is now ' + value);
+});
+// listDevices([cb(error, result)]);
+
 wss.on('connection', function (ws) {
-    let numberOfPlayers = 0;
-    let alivePlayers = 0;
-    let field = [];
-    let playerOnMove = 0;
+    connectionPool.push(ws);
+    console.log("new connection - number: " + connectionPool.length + 1);
 
-    // ws.send("Waiting cin game lobby");
-    while (true) {
-        /* if button push - new game is started */
-        if (getStartButtonState() === true) {
-            // calculate the number of player / the number of jacks connected at the beginning
-            numberOfPlayers = getNumberOfPlayers();
-            alivePlayers = numberOfPlayers;
-            generatePlayersObj(numberOfPlayers);
-            // generate field
-            field = generateField();
-            invokeLEDs(field);
-
-            // game cycle
-            while(true) {
-                let diceFlag = false;
-                //can be made to wait for interupt
-                let playerPosition = -1;
-                let playerDiceValue = 0;
-                let oldPlayerPostion = -1;
-                playerOnMove = getPlayerOnMove(playerOnMove);
-                ws.send(JSON.stringify({
-                    type: "player-information",
-                    playerToMove: playerOnMove
-                }));
-                /*one person turn*/
-                while (diceFlag !== true) {
-                    /*if dice button pushed*/
-                    if (true) {
-                        playerDiceValue = Math.round(Math.random() * 5) + 1;
-                        ws.send(JSON.stringify({
-                            type: "dice",
-                            value: `${playerDiceValue}`
-                        }));
-                        diceFlag = true;
-                        oldPlayerPostion = getPlayerPosition();
-                    }
-                }
-
-                while(true) {
-                    playerPosition = getPlayerPosition();
-                    if (playerPosition !== -1 && oldPlayerPostion !== playerPosition) {
-                        if (playerPosition + playerDiceValue === getPlayerPosition()) {
-                            /*when the dice button is clicked and the player has moved to the right place*/
-                            handleCorretFieldOptions(playerPosition + playerDiceValue, field, playerOnMove, ws);
-                        } else {
-                            /*not on right position*/
-                            players[playerOnMove].hp -= 2;
-                            ws.send(JSON.stringify({
-                                type: "penalty",
-                                value: `${players[playerOnMove]}`
-                            }));
-                        }
-                        break;
-                    } else {
-                        continue;
-                    }
-                }
-
-                if (alivePlayers === 1) {
-                    // someone won
-
-                    players = [];
-                    break;
-                }
-            }
+    // var list = sensor.list();
+    // listDevices([cb(error, result)]);
+    sensors.listDevices(function (err, devices) {
+        if (err) {
+            console.log('An error occurred', err);
+            // return;
         }
-    }
+
+        console.log('Read all devices', devices);
+    });
+
+    // sendAllClients();
 });
 
-function getStartButtonState() {
-    return true;
+var ws281x = require('rpi-ws281x-native');
+
+var NUM_LEDS = parseInt(16),
+    pixelData = new Uint32Array(NUM_LEDS);
+
+ws281x.init(NUM_LEDS);
+
+// ---- trap the SIGINT and reset before exit
+process.on('SIGINT', function () {
+    ws281x.reset();
+    process.nextTick(function () { process.exit(0); });
+});
+
+
+/*
+for (var i = 0; i < NUM_LEDS; i++) {
+    pixelData[i] = colorwheel((1 + i) % 256);
+
 }
 
-function handleCorretFieldOptions(playerPostion, field, player, ws) {
-    let color = field[playerPostion].color;
-    if(color === "red") {
-        //red ask a question if answered wrong deal damage
-        askQuestion(player, ws);
+ws281x.render(pixelData);
+*/
+
+// ---- animation-loop
+var offset = 0;
+setInterval(function () {
+    for (var i = 0; i < NUM_LEDS; i++) {
+        pixelData[i] = colorwheel((offset + i) % 256);
     }
-    if(color === "green") {
-        //green asks a question if answered correctly restore 1
-        askQuestion(player, ws);
-    }
+
+    offset = (offset + 1) % 256;
+    ws281x.render(pixelData);
+}, 1000 / 30);
+
+console.log('Press <ctrl>+C to exit.');
+
+
+// rainbow-colors, taken from http://goo.gl/Cs3H0v
+function colorwheel(pos) {
+    pos = 255 - pos;
+    if (pos < 85) { return rgb2Int(255 - pos * 3, 0, pos * 3); }
+    else if (pos < 170) { pos -= 85; return rgb2Int(0, pos * 3, 255 - pos * 3); }
+    else { pos -= 170; return rgb2Int(pos * 3, 255 - pos * 3, 0); }
 }
 
-function askQuestion(player, ws) {
-    // draw question from static file
-    let question
-
-    ws.send(JSON.stringify({
-        value: `${question}`
-    }))
-
-    // /accept button input
-    while(true) {
-        //if any of the 2 buttons are down
-        break;
-    }
+function rgb2Int(r, g, b) {
+    return ((r & 0xff) << 16) + ((g & 0xff) << 8) + (b & 0xff);
 }
-
-function answerQuestion() {
-    //read answer buttons and send question feedback
-}
-
-function invokeLEDs(field) {
-    /*Sets diod's GPIO's*/
-}
-
-function generatePlayersObj() {
-    players = [];
-    let boardInfo = getBoardInfo();
-    // for (let i = 0; i < boardInfo.size; i++) {
-    for (let i = 0; i < 4; i++) {
-        players.push(
-            {
-                id: i,
-                sensorId: 0,
-                hp: 10,
-                turns: 0,
-                position: 0,
-            }
-        );
-    }
-}
-
-function getBoardInfo() {
-    /*Returns the S_id's and current position for them*/
-    return [];
-}
-
-function getPlayerPosition(playerId) {
-    //read gpio with given id
-    return 0;
-}
-/*ws.on('message', function (message) {
-            console.log('received: %s', message)
-            });
-        */
-
-function getPlayerOnMove(playerOnMove) {
-    if (playerOnMove + 1 > players.length - 1) {
-        return 0;
-    } else {
-        return playerOnMove + 1
-    }
-}
-
-function getNumberOfPlayers() {
-    //TODO
-    return 0;
-}
-
+/*Generating random field with 10 green and 6 red fields*/
 function generateField() {
     let result = [];
-    let color = 'green';
+    let color = "green";
+
     for (let i = 0; i < 16; i++) {
         if (i >= 10 && color !== "red") {
             color = "red";
@@ -183,7 +138,85 @@ function generateField() {
 function shuffle(a) {
     for (let i = a.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
+        let temp = a[i];
+        a[i] = a[j];
+        a[j] = temp;
+        // [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
+}
+
+function sendNewClientInitalInfo(ws) {
+    ws.send(JSON.stringify({
+        type: "game",
+        game: gameState
+    }));
+}
+
+/*when event is handled and something has changed*/
+function sendAllClients(data) {
+    var dataToSend = data;
+
+    if (!data) {
+        /*in case the data is undefined a.k.a is not passed as argument or is false, null, undefined, 0*/
+        dataToSend = gameState;
+    }
+
+    connectionPool.map(function (value, index, array) {
+        console.log("client_id_connected: " + index);
+    });
+}
+
+function getDiceValue() {
+    return Math.round(Math.random() * 5) + 1;
+}
+
+/*when new game is started*/
+function initializeNewGame() {
+    gameState.started = true;
+    gameState.players = initPlayers();
+}
+
+function lightLEDs() {
+    gpio.setup(18, gpio.DIR_OUT, write);
+}
+
+function write() {
+    gpio.write(7, true, function(err) {
+        if (err) throw err;
+        console.log('Written to pin');
+    });
+}
+
+/*close game when is finished*/
+function closeGame() {
+    gameState = {};
+}
+
+/*initializing player*/
+function initPlayers() {
+    var players = [];
+    for (var i = 0; i < 4; i++) {
+        players.push(
+            {
+                id: i,
+                sensorId: "12312",
+                alive: true,
+                color: colors[i],
+
+            }
+        );
+    }
+}
+
+/*Returns the number of alive players*/
+function getAlivePlayers() {
+    var counter = 0;
+    gameState.players.map(function (value) {
+        if (value.alive) {
+            counter++;
+        }
+    })
+
+    return counter;
 }
