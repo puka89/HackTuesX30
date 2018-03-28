@@ -1,4 +1,4 @@
-update=3/16/2018 13:18:44
+update=Wed 28 Mar 2018 01:49:39 PM EEST
 version=1
 last_client=kicad
 [pcbnew]
@@ -62,3 +62,4 @@ LibName30=atmel
 LibName31=contrib
 LibName32=valves
 LibName33=ws2811
+LibName34=maxim
