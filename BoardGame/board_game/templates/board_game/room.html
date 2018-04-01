@@ -6,8 +6,10 @@
     <title>Chat Room</title>
 </head>
 <body>
-    <textarea id="chat-log" cols="100" rows="20"></textarea><br/>
-    <button onclick="test()"> Send </button>
+    <table>
+      <tr id="headers">
+      </tr>
+    </table>
     <!--  Create table interfacing the players and the dice -->
 </body>
 <script>
@@ -18,7 +20,7 @@
 
     chatSocket.onmessage = function(e) {
         var data = JSON.parse(e.data);
-        var game_state = data['game_state'];
+        var game_state = data;
         render_game_state(game_state)
     };
 
@@ -26,14 +28,8 @@
         console.error('Chat socket closed unexpectedly');
     };
 
-    function test() {
-      chatSocket.send(JSON.stringify({
-            'type': 'question'
-      }));
-    };
-
     function render_game_state(game_state) {
-      return
+      console.log(game_state);
     }
 
 </script>

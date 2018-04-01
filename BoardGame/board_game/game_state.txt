@@ -1,0 +1,1 @@
+{"question": "", "players_count": 2, "player_turn": 0, "players_array": [{"health": 10, "color": "purple"}, {"health": 10, "color": "blue"}], "type": "game_state"}
