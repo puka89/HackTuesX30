@@ -5,15 +5,71 @@ from tornado.websocket import WebSocketHandler as ws
 from RPi import GPIO
 from time import sleep
 from threading import Thread
+import random
 
 GPIO.setmode(GPIO.BOARD)
 clients = []
-sensor_ids = {
+
+current = []
+playing = ["03172455d7ff", "0317243e28ff", "03172459f6ff", "0317243c31ff"]
+
+sensors_dict = {
 	"03172455d7ff" : "red",
 	"0317243e28ff" : "black",
 	"03172459f6ff" : "white",
 	"0317243c31ff" : "yellow"
 }
+
+fields_gpio = {
+	"1" : 36,
+	"2" : 38,
+	"3" : 40,
+	"4" : 31,
+	"5" : 15,
+	"6" : 23,
+	"7" : 21,
+	"8" : 19,
+	"9" : 5,
+	"10" : 18,
+	"11" : 16,
+	"12" : 12,
+	"13" : 11,
+	"14" : 13,
+	"15" : 22,
+	"16" : 32,
+}
+
+fields_status = random.shuffle(['red', 'red', 'red', 'red', 'red', 'red', 'red',
+							 'red', 'red', 'red', 'g', 'g', 'g', 'g', 'g', 'g'])
+
+positions = {
+	"1" : "03172455d7ff",
+	"2" : "",
+	"3" : "",
+	"4" : "",
+	"5" : "0317243e28ff",
+	"6" : "",
+	"7" : "",
+	"8" : "",
+	"9" : "03172459f6ff",
+	"10" : "",
+	"11" : "",
+	"12" : "",
+	"13" : "0317243c31ff",
+	"14" : "",
+	"15" : "",
+	"16" : "",
+}
+
+buttons_gpio = {
+	"1" : 29,
+	"2" : 33,
+	"3" : 35
+}
+
+dice_flag = 0
+answer_flag = 0
+start_game_flag = 0
 
 class GameHandler(RequestHandler):
     def get(self):
@@ -64,10 +120,11 @@ def gpio_setup():
 def read_w1_bus():
     while True:
 	sensor_ids = []
-	sensors = DS18B20.get_all_sensors()
-	for sensor in sensors:
+	sensors_temp = DS18B20.get_all_sensors()
+	for sensor in sensors_temp:
 	    sensor_ids.append(sensor.get_id())
-	up_sensor
+
+	current = sensor_ids
 	time.sleep(.4)
 
 def diff(first, second):
@@ -75,23 +132,46 @@ def diff(first, second):
     return [item for item in first if item not in second]
 
 def print_state(data):
-    time.sleep(1.5)
-    print(data)
+	#assuming no interrupt on pull out
+	sensor_id = diff(playing, current)
+	positions[data] = sensor_id
+	print(data)
+    time.sleep(1)
+
+def start_game():
+	pass
+
+def roll_dice():
+	pass
+
+def answer_true():
+	pass
+
+def answer_false():
+	pass
 
 def button_1(data):
-    print("you started")
+	if start_game_flag == 1:
+		start_game()
+		start_game_flag = 0
+	elif dice_flag == 1:
+		roll_dice()
+		dice_flag = 0
 
 def button_false(data):
-    print("you said false")
+    if answer_flag == 1:
+		answer_false()
+		answer_flag = 0
 
 def button_true (data):
-    print("you said true")
+	if answer_flag == 1:
+		answer_true()
+		answer_flag = 0
 
 def main():
     #setup gpios
     gpio_setup()
-    #add gpio inerrupt handlers
-    gpio_setup_event_handlers()
+
     GPIO.add_event_detect(36, GPIO.FALLING, print_state, bouncetime=1000)
     GPIO.add_event_detect(38, GPIO.FALLING, print_state, bouncetime=1000)
     GPIO.add_event_detect(40, GPIO.FALLING, print_state, bouncetime=1000)
@@ -111,6 +191,9 @@ def main():
     GPIO.add_event_detect(29, GPIO.FALLING, button_1, bouncetime=400)
     GPIO.add_event_detect(33, GPIO.FALLING, button_false, bouncetime=400)
     GPIO.add_event_detect(35, GPIO.FALLING, button_true, bouncetime=400)
+
+	reading_thread = new Thread(target=read_w1_bus)
+	reading_thread.start()
 
     app = make_app()
     app.listen(8888)
