@@ -147,14 +147,18 @@ def blocking_debounce():
 
 	    while True:
 	        if high_count == 3:
-				pulling_event(pin)
+				if !asnwer_flag:
+					pulling_event(pin)
 				GPIO.add_event_detect(pin, GPIO.BOTH, handle_gpio)
 				low_count = 0
 				high_count = 0
 				break
 
 			if low_count == 3:
-				putting_event(pin)
+				if asnwer_flag != 1:
+					putting_event(pin)
+				if answer_flag == 1:
+					received_answer(pin)
 				GPIO.add_event_detect(pin, GPIO.BOTH, handle_gpio)
 				low_count = 0
 				high_count = 0
@@ -182,15 +186,16 @@ def putting_event(pin):
 	positions[gpio_fields[pin]] = removed_pawn_id
 
 	if fields_status[int(gpio_fields[pin])] == 'red':
-		prompt_question(sensors_dict[removed_pawn_id])
+		global player = sensors_dict[removed_pawn_id]
+		prompt_question()
 
 	removed_pawn_id = ""
 
-def prompt_question(player):
+def prompt_question():
 	data = json.load(open("questions.json", "r"))
 	question_list = data[random.randint(1, 10)]
 	question = question_list[0]
-	answer = question_list[1]
+	global answer = question_list[1]
 
 	send_message(question)
 	answer_lock()
@@ -200,9 +205,25 @@ def send_message(message):
 		client.write_message(message)
 
 def answer_lock():
-	GPIO.add_event_detect(33, GPIO.BOTH, button_false)
-    GPIO.add_event_detect(35, GPIO.BOTH, button_true)
+	answer_flag = 1
+	GPIO.add_event_detect(33, GPIO.BOTH, handle_gpio) #false
+    GPIO.add_event_detect(35, GPIO.BOTH, handle_gpio) #true
 	GPIO.remove_event_detect(29)
+
+def answer_unlock():
+	answer_flag = 0
+	dice_flag = 1
+	GPIO.remove_event_detect(33)
+    GPIO.remove_event_detect(35)
+	GPIO.add_event_detect(29, GPIO.BOTH, handle_gpio)
+
+def received_answer(pin):
+	if answers[pin] != answer:
+		players[player] -= 1
+
+	answer_unlock()
+	for client in clients:
+		client.write_message(players)
 
 def gpio_setup():
 	GPIO.setup(36, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -245,7 +266,7 @@ def gpio_events():
     GPIO.add_event_detect(13, GPIO.BOTH, handle_gpio)
     GPIO.add_event_detect(22, GPIO.BOTH, handle_gpio)
     GPIO.add_event_detect(32, GPIO.BOTH, handle_gpio)
-	GPIO.add_event_detect(29, GPIO.BOTH, button_1)
+	GPIO.add_event_detect(29, GPIO.BOTH, handle_gpio)
 
 def init_players():
 	pass
