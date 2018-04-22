@@ -2,7 +2,7 @@ import tornado.ioloop as ioloop
 import tornado.web as web
 from tornado.web import RequestHandler, Application
 from tornado.websocket import WebSocketHandler as ws
-from RPi import GPIO
+# from RPi import GPIO
 from time import sleep
 from threading import Thread
 import random
@@ -24,16 +24,22 @@ class GameWebSocket(ws):
 	def close(self):
 		print("disconnected")
 
-GPIO.setmode(GPIO.BOARD)
+# GPIO.setmode(GPIO.BOARD)
+def make_app():
+    return web.Application([
+        (r"/", GameHandler),
+        (r"/index", GameWebSocket),
+    ])
 
 clients = []
 
 dice_flag = 0
 answer_flag = 0
-start_game_flag = 0
+start_game_flag = 1
 
 playing = ["03172455d7ff", "0317243e28ff", "03172459f6ff", "0317243c31ff"]
-
+player = ""
+answer = ""
 players = {
 	"red" : 10,
 	"black" : 10,
@@ -97,45 +103,22 @@ buttons_gpio = {
 	"3" : 35
 }
 
-def make_app():
-    return web.Application([
-        (r"/", GameHandler),
-        (r"/index", GameWebSocket),
-    ])
-
 def diff(first, second):
     second = set(second)
     return [item for item in first if item not in second]
 
 def start_game():
-	pass
+	start_game_flag = 0
+	dice_flag = 1
+	gpio_events()
 
 def roll_dice():
-	pass
+	dice_flag = 0
+	answer_flag = 1
+	value = random.randint(1, 6)
 
-def answer_true():
-	pass
-
-def answer_false():
-	pass
-
-def button_1(data):
-	if start_game_flag == 1:
-		start_game()
-		start_game_flag = 0
-	elif dice_flag == 1:
-		roll_dice()
-		dice_flag = 0
-
-def button_false(data):
-    if answer_flag == 1:
-		answer_false()
-		answer_flag = 0
-
-def button_true (data):
-	if answer_flag == 1:
-		answer_true()
-		answer_flag = 0
+	for client in clients:
+		client.write_message(value)
 
 def read_w1_bus():
 	sensor_ids = []
@@ -149,37 +132,42 @@ def blocking_debounce():
 	low_count = 0
 	high_count = 0
 
-	while !queue.empty():
+	while not queue.empty():
 		pin = queue.get_nowait()
 
-	    while True:
-	        if high_count == 3:
-				if !asnwer_flag:
+		while True:
+			if high_count == 3:
+				if start_game_flag != 1 and dice_flag != 1 and answer_flag != 1:
 					pulling_event(pin)
-				GPIO.add_event_detect(pin, GPIO.BOTH, handle_gpio)
+				# GPIO.add_event_detect(pin, GPIO.BOTH, handle_gpio)
 				low_count = 0
 				high_count = 0
 				break
 
 			if low_count == 3:
-				if asnwer_flag != 1:
-					putting_event(pin)
-				if answer_flag == 1:
+				if start_game_flag == 1:
+					start_game()
+				elif dice_flag == 1:
+					roll_dice()
+				elif answer_flag == 1:
 					received_answer(pin)
-				GPIO.add_event_detect(pin, GPIO.BOTH, handle_gpio)
+				else:
+					putting_event(pin)
+
+				# GPIO.add_event_detect(pin, GPIO.BOTH, handle_gpio)
 				low_count = 0
 				high_count = 0
 				break
 
-	        if GPIO.input(event) == GPIO.LOW:
-	            low_count += 1
-	        else:
-	            high_count += 1
+			# if GPIO.input(event) == GPIO.LOW:
+			# 	low_count += 1
+			# else:
+			# 	high_count += 1
 
-	        time.sleep(0.1)
+			time.sleep(0.1)
 
 def handle_gpio(pin):
-	GPIO.remove_event_detect(pin)
+	# GPIO.remove_event_detect(pin)
 	queue.put_nowait(pin)
 
 def pulling_event(pin):
@@ -193,7 +181,7 @@ def putting_event(pin):
 	positions[gpio_fields[pin]] = removed_pawn_id
 
 	if fields_status[int(gpio_fields[pin])] == 'red':
-		global player = sensors_dict[removed_pawn_id]
+		player = sensors_dict[removed_pawn_id]
 		prompt_question()
 
 	removed_pawn_id = ""
@@ -202,7 +190,7 @@ def prompt_question():
 	data = json.load(open("questions.json", "r"))
 	question_list = data[random.randint(1, 10)]
 	question = question_list[0]
-	global answer = question_list[1]
+	answer = question_list[1]
 
 	send_message(question)
 	answer_lock()
@@ -213,16 +201,16 @@ def send_message(message):
 
 def answer_lock():
 	answer_flag = 1
-	GPIO.add_event_detect(33, GPIO.BOTH, handle_gpio) #false
-    GPIO.add_event_detect(35, GPIO.BOTH, handle_gpio) #true
-	GPIO.remove_event_detect(29)
+	# GPIO.add_event_detect(33, GPIO.BOTH, handle_gpio) #false
+	# GPIO.add_event_detect(35, GPIO.BOTH, handle_gpio) #true
+	# GPIO.remove_event_detect(29)
 
 def answer_unlock():
 	answer_flag = 0
 	dice_flag = 1
-	GPIO.remove_event_detect(33)
-    GPIO.remove_event_detect(35)
-	GPIO.add_event_detect(29, GPIO.BOTH, handle_gpio)
+	# GPIO.remove_event_detect(33)
+	# GPIO.remove_event_detect(35)
+	# GPIO.add_event_detect(29, GPIO.BOTH, handle_gpio)
 
 def received_answer(pin):
 	if answers[pin] != answer:
@@ -233,58 +221,59 @@ def received_answer(pin):
 		client.write_message(players)
 
 def gpio_setup():
-	GPIO.setup(36, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(38, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(40, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(31, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(19, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(11, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(13, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(22, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(32, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(29, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(33, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(35, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(29, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(33, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-	GPIO.setup(35, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(36, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(38, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(40, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(31, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(19, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(11, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(13, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(22, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(32, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(29, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(33, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(35, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(29, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(33, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	# GPIO.setup(35, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+	pass
 
 def gpio_events():
-	GPIO.add_event_detect(36, GPIO.BOTH, handle_gpio)
-    GPIO.add_event_detect(38, GPIO.BOTH, handle_gpio)
-    GPIO.add_event_detect(40, GPIO.BOTH, handle_gpio)
-    GPIO.add_event_detect(31, GPIO.BOTH, handle_gpio)
-    GPIO.add_event_detect(15, GPIO.BOTH, handle_gpio)
-    GPIO.add_event_detect(23, GPIO.BOTH, handle_gpio)
-    GPIO.add_event_detect(21, GPIO.BOTH, handle_gpio)
-    GPIO.add_event_detect(19, GPIO.BOTH, handle_gpio)
-    GPIO.add_event_detect(5, GPIO.BOTH, handle_gpio)
-    GPIO.add_event_detect(18, GPIO.BOTH, handle_gpio)
-    GPIO.add_event_detect(16, GPIO.BOTH, handle_gpio)
-    GPIO.add_event_detect(12, GPIO.BOTH, handle_gpio)
-    GPIO.add_event_detect(11, GPIO.BOTH, handle_gpio)
-    GPIO.add_event_detect(13, GPIO.BOTH, handle_gpio)
-    GPIO.add_event_detect(22, GPIO.BOTH, handle_gpio)
-    GPIO.add_event_detect(32, GPIO.BOTH, handle_gpio)
-	GPIO.add_event_detect(29, GPIO.BOTH, handle_gpio)
+	# GPIO.add_event_detect(36, GPIO.BOTH, handle_gpio)
+	# GPIO.add_event_detect(38, GPIO.BOTH, handle_gpio)
+	# GPIO.add_event_detect(40, GPIO.BOTH, handle_gpio)
+	# GPIO.add_event_detect(31, GPIO.BOTH, handle_gpio)
+	# GPIO.add_event_detect(15, GPIO.BOTH, handle_gpio)
+	# GPIO.add_event_detect(23, GPIO.BOTH, handle_gpio)
+	# GPIO.add_event_detect(21, GPIO.BOTH, handle_gpio)
+	# GPIO.add_event_detect(19, GPIO.BOTH, handle_gpio)
+	# GPIO.add_event_detect(5, GPIO.BOTH, handle_gpio)
+	# GPIO.add_event_detect(18, GPIO.BOTH, handle_gpio)
+	# GPIO.add_event_detect(16, GPIO.BOTH, handle_gpio)
+	# GPIO.add_event_detect(12, GPIO.BOTH, handle_gpio)
+	# GPIO.add_event_detect(11, GPIO.BOTH, handle_gpio)
+	# GPIO.add_event_detect(13, GPIO.BOTH, handle_gpio)
+	# GPIO.add_event_detect(22, GPIO.BOTH, handle_gpio)
+	# GPIO.add_event_detect(32, GPIO.BOTH, handle_gpio)
+	pass
 
 def main():
-    gpio_setup()
-	gpio_events()
+	gpio_setup()
+	# GPIO.add_event_detect(29, GPIO.BOTH, handle_gpio)
 
-	blocking_debounce_thread = new Thread(target=blocking_debounce)
+	blocking_debounce_thread = Thread(target=blocking_debounce)
 	blocking_debounce_thread.start()
 
-    app = make_app()
-    app.listen(8888)
-    ioloop.IOLoop.current().start()
+	app = make_app()
+	app.listen(8888)
+	ioloop.IOLoop.current().start()
 
 if __name__ == "__main__":
     main()

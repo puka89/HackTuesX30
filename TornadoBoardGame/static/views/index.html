@@ -1,0 +1,54 @@
+<script>
+  var chatSocket = new WebSocket(
+      'ws://' + window.location.host +
+      '/index');
+
+  chatSocket.onmessage = function(e) {
+    var data = JSON.parse(e.data);
+    if (data["player"] != undefined) {
+      if (document.getElementById('r_hp').value = data.player["red"] == 0) {
+        document.getElementById('red').value = "Dead"
+      }
+      if (document.getElementById('b_hp').value = data.player["black"] == 0) {
+        document.getElementById('black').value = "Dead"
+      }
+      if (document.getElementById('w_hp').value = data.player["white"] == 0) {
+        document.getElementById('white').value = "Dead"
+      }
+      if (document.getElementById('y_hp').value = data.player["yellow"] == 0) {
+        document.getElementById('yellow').value = "Dead"
+      }
+    }
+    else if (data["dice"] != undefined) {
+      document.getElementById('dice').value = data["dice"]
+    }
+  };
+
+  chatSocket.onclose = function(e) {
+    console.error('Chat socket closed unexpectedly');
+  };
+</script>
+
+<table>
+  <tr>
+    <th>Red</th>
+    <th>Black</th>
+    <th>White</th>
+    <th>Yellow</th>
+  </tr>
+  <tr>
+    <td id="r_hp">10</td>
+    <td id="b_hp">10</td>
+    <td id="w_hp">10</td>
+    <td id="y_hp">10</td>
+  </tr>
+  <tr>
+    <td id="red">Alive</td>
+    <td id="black">Alive</td>
+    <td id="white">Alive</td>
+    <td id="yellow">Alive</td>
+  </tr>
+</table>
+
+<div id="dice">
+</div>
