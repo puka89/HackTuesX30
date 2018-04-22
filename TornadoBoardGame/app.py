@@ -34,6 +34,13 @@ start_game_flag = 0
 
 playing = ["03172455d7ff", "0317243e28ff", "03172459f6ff", "0317243c31ff"]
 
+players = {
+	"red" : 10,
+	"black" : 10,
+	"white" : 10,
+	"yellow" : 10
+}
+
 queue = Queue()
 
 gpio_fields = {
@@ -48,7 +55,7 @@ gpio_fields = {
 	"5" : 9,
 	"18" : 10,
 	"16" : 11,
-	"12" : 12,
+	"3" : 12,
 	"11" : 13,
 	"13" : 14,
 	"22" : 15,
@@ -268,13 +275,9 @@ def gpio_events():
     GPIO.add_event_detect(32, GPIO.BOTH, handle_gpio)
 	GPIO.add_event_detect(29, GPIO.BOTH, handle_gpio)
 
-def init_players():
-	pass
-
 def main():
     gpio_setup()
 	gpio_events()
-	init_players()
 
 	blocking_debounce_thread = new Thread(target=blocking_debounce)
 	blocking_debounce_thread.start()
