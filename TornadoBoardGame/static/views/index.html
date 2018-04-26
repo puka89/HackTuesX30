@@ -6,6 +6,7 @@
       'ws://' + window.location.host +
       '/index');
 
+  players = ["Red", "Black", "White", "Yellow"]
 
   chatSocket.onmessage = function(e) {
     var data = JSON.parse(e.data);
@@ -22,7 +23,7 @@
   };
 
   function displayTurn(turn) {
-      document.getElementById('turn').value = turn;
+      document.getElementById('turn').value = players[turn];
   }
 
   function displayQuestion(question) {
