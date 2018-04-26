@@ -1,33 +1,178 @@
+<HTML>
+<HEAD>
+
 <script>
   var chatSocket = new WebSocket(
       'ws://' + window.location.host +
       '/index');
 
+
   chatSocket.onmessage = function(e) {
     var data = JSON.parse(e.data);
-    if (data["player"] != undefined) {
-      if (document.getElementById('r_hp').value = data.player["red"] == 0) {
-        document.getElementById('red').value = "Dead"
-      }
-      if (document.getElementById('b_hp').value = data.player["black"] == 0) {
-        document.getElementById('black').value = "Dead"
-      }
-      if (document.getElementById('w_hp').value = data.player["white"] == 0) {
-        document.getElementById('white').value = "Dead"
-      }
-      if (document.getElementById('y_hp').value = data.player["yellow"] == 0) {
-        document.getElementById('yellow').value = "Dead"
-      }
-    }
-    else if (data["dice"] != undefined) {
-      document.getElementById('dice').value = data["dice"]
+
+    if (data["player"] !== undefined) {
+        updatePlayers(data);
+    } else if (data["dice"] !== undefined) {
+        diceHandle(data.dice.diceValue);
+    } else if (!data["question"]) {
+        displayQuestion(data.question.questionValue);
+    } else if (data["turn"]) {
+        displayTurn(data.turn.value);
     }
   };
+
+  function displayTurn(turn) {
+      document.getElementById('turn').value = turn;
+  }
+
+  function displayQuestion(question) {
+      document.getElementById('question').value = question;
+  }
+
+  function diceHandle(diceValue) {
+      document.getElementById('dice-value').value = diceValue;
+  }
+
+  function updatePlayers(data) {
+      if (document.getElementById('red-hp').value = data.player['red'] <= 0) {
+          document.getElementById('red-hp').value = "Dead"
+      }
+      if (document.getElementById('black-hp').value = data.player["black"] <= 0) {
+          document.getElementById('black-hp').value = "Dead"
+      }
+      if (document.getElementById('white-hp').value = data.player["white"] <= 0) {
+          document.getElementById('white-hp').value = "Dead"
+      }
+      if (document.getElementById('yellow-hp').value = data.player["yellow"] <= 0) {
+          document.getElementById('yellow-hp').value = "Dead"
+      }
+  }
 
   chatSocket.onclose = function(e) {
     console.error('Chat socket closed unexpectedly');
   };
 </script>
+    <style>
+        .players-box {
+            display: flex;
+            justify-content: space-around;
+        }
+        .dice-box {
+            display: flex;
+            justify-content: center;
+        }
+        .question-box {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .red-player div , .black-player div, .yellow-player div, .white-player div, .red-player span , .black-player span, .yellow-player span, .white-player span {
+            display: flex;
+            justify-content: center;
+        }
+
+        .red-player, .black-player, .yellow-player, .white-player {
+            padding: 9%;
+            border-radius: 5px;
+            color: #cccccc;
+            font-size: 40px;
+        }
+
+        .red-player {
+            background: crimson;
+        }
+
+        .yellow-player {
+            background: sandybrown;
+        }
+
+        .black-player {
+            background: #161616;
+        }
+
+        .white-player {
+            background: #cccccc;
+            color: #161616;
+        }
+
+        body {
+            background: darkslategrey;
+        }
+
+
+        .dice-box {
+            margin-top: 5px;
+            font-size: 40px;
+            color: #161616;
+            width: 100%;
+            background: aquamarine;
+        }
+
+        .question-box {
+            width: 100%;
+            height: 25%;
+            background: mediumseagreen;
+            font-size: 50px;
+            color: #161616;
+        }
+
+        .question-box div, .question-box span {
+            padding-top: 4%;
+        }
+
+        .question-box div {
+            font-size: 30px;
+        }
+
+
+    </style>
+
+<title>Board Game</title>
+</HEAD>
+<BODY>
+    <div class="players-box">
+        <div class="red-player">
+            <span>Red</span>
+            <div id="red-hp">-</div>
+        </div>
+
+        <div class="yellow-player">
+            <span>Yellow</span>
+            <div id="yellow-hp">-</div>
+        </div>
+
+        <div class="black-player">
+            <span>Black</span>
+            <div id="black-hp">-</div>
+        </div>
+
+        <div class="white-player">
+            <span>White</span>
+            <div id="white-hp">-</div>
+        </div>
+    </div>
+
+    <div class="dice-box">
+        <div>
+        <span>DICE</span>
+        <div id="dice-value">-</div>
+        </div>
+
+        <div class="player-on-move">
+            <div id="turn">-</div>
+        </div>
+    </div>
+
+    <div class="question-box">
+        <div id="question">-</div>
+        <span>YES or NO</span>
+    </div>
+</BODY>
+</HTML>
+<!--
+
+
+
 
 <table>
   <tr>
@@ -52,3 +197,4 @@
 
 <div id="dice">
 </div>
+-->
