@@ -8,6 +8,7 @@ from threading import Thread
 import random
 from asyncio import Queue
 import json
+from ds18b20 import DS18B20
 
 class GameHandler(RequestHandler):
     def get(self):
@@ -149,48 +150,55 @@ def read_w1_bus():
 def blocking_debounce():
     low_count = 0
     high_count = 0
+    
+    while True:
+        while not queue.empty():
+            print("ad")
+            pin = queue.get_nowait()
 
-    while not queue.empty():
-        pin = queue.get_nowait()
+            for i in range(8):
+                if high_count == 3:
+                    if not answer_flag:
+                        print("visoko")
+                        pulling_event(pin)
+                    GPIO.add_event_detect(pin, GPIO.BOTH, handle_gpio)
+                    low_count = 0
+                    high_count = 0
+                    break
 
-        while True:
-            if high_count == 3:
-                if not asnwer_flag:
-                    pulling_event(pin)
-                GPIO.add_event_detect(pin, GPIO.BOTH, handle_gpio)
-                low_count = 0
-                high_count = 0
-                break
+                if low_count == 3:
+                    if answer_flag != 1:
+                        print("nisko")
+                        putting_event(pin)
+                    if answer_flag == 1:
+                        received_answer(pin)
+                    GPIO.add_event_detect(pin, GPIO.BOTH, handle_gpio)
+                    low_count = 0
+                    high_count = 0
+                    break
 
-            if low_count == 3:
-                if asnwer_flag != 1:
-                    putting_event(pin)
-                if answer_flag == 1:
-                    received_answer(pin)
-                GPIO.add_event_detect(pin, GPIO.BOTH, handle_gpio)
-                low_count = 0
-                high_count = 0
-                break
+                if GPIO.input(pin) == GPIO.LOW:
+                    low_count += 1
+                else:
+                    high_count += 1
 
-            if GPIO.input(event) == GPIO.LOW:
-                low_count += 1
-            else:
-                high_count += 1
-
-            time.sleep(0.1)
+                sleep(0.1)
 
 def handle_gpio(pin):
+    print(pin)
     GPIO.remove_event_detect(pin)
     queue.put_nowait(pin)
 
 def pulling_event(pin):
-    time.sleep(0.7)
+    sleep(0.7)
     current = read_w1_bus()
     removed_pawn_id = diff(playing, current)
-    positions[gpio_fields[pin]] = ""
+    print(removed_pawn_id)
+    print(gpio_fields[pin])
+    positions[gpio_fields[str(pin)]] = ""
 
 def putting_event(pin):
-    time.sleep(0.7)
+    sleep(0.7)
     positions[gpio_fields[pin]] = removed_pawn_id
 
     if fields_status[int(gpio_fields[pin])] == 'red':
