@@ -6,45 +6,40 @@
       'ws://' + window.location.host +
       '/index');
 
+  players = ["Red", "Black", "White", "Yellow"]
 
   chatSocket.onmessage = function(e) {
     var data = JSON.parse(e.data);
-
-    if (data["player"] !== undefined) {
-        updatePlayers(data);
-    } else if (data["dice"] !== undefined) {
-        diceHandle(data.dice.diceValue);
-    } else if (!data["question"]) {
-        displayQuestion(data.question.questionValue);
-    } else if (data["turn"]) {
-        displayTurn(data.turn.value);
-    }
+    displayTurn(data['turn']);
+    displayQuestion(data['question']);
+    diceHandle(data['dice']);
+    updatePlayers(data['players']);
   };
 
   function displayTurn(turn) {
-      document.getElementById('turn').value = turn;
+      document.getElementById('turn').innerHTML = players[turn];
   }
 
   function displayQuestion(question) {
-      document.getElementById('question').value = question;
+      document.getElementById('question').innerHTML = question;
   }
 
   function diceHandle(diceValue) {
-      document.getElementById('dice-value').value = diceValue;
+      document.getElementById('dice-value').innerHTML = diceValue;
   }
 
   function updatePlayers(data) {
-      if (document.getElementById('red-hp').value = data.player['red'] <= 0) {
-          document.getElementById('red-hp').value = "Dead"
+      if ((document.getElementById('red-hp').innerHTML = data.player['red']) <= 0) {
+          document.getElementById('red-hp').innerHTML = "Dead"
       }
-      if (document.getElementById('black-hp').value = data.player["black"] <= 0) {
-          document.getElementById('black-hp').value = "Dead"
+      if ((document.getElementById('black-hp').innerHTML = data.player["black"]) <= 0) {
+          document.getElementById('black-hp').innerHTML = "Dead"
       }
-      if (document.getElementById('white-hp').value = data.player["white"] <= 0) {
-          document.getElementById('white-hp').value = "Dead"
+      if ((document.getElementById('white-hp').innerHTML = data.player["white"]) <= 0) {
+          document.getElementById('white-hp').innerHTML = "Dead"
       }
-      if (document.getElementById('yellow-hp').value = data.player["yellow"] <= 0) {
-          document.getElementById('yellow-hp').value = "Dead"
+      if ((document.getElementById('yellow-hp').innerHTML = data.player["yellow"]) <= 0) {
+          document.getElementById('yellow-hp').innerHTML = "Dead"
       }
   }
 
