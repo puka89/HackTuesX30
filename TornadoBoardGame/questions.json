@@ -1,4 +1,19 @@
 {
-    "one" : { "question" : "Is Sofia named after Pablo Picasso", "answer" : "False"},
-    "two" : { "question" : "Is Sofia polluted", "answer" : "True" }
+    "one" : { "question" : "ТУЕС == Технологично Училище Електронни Системи", "answer" : "False"},
+    "two" : { "question" : "Учениците на ТУЕС прекарват най-много 5 часа в ТУЕС", "answer" : "True" },
+    "three" : {"question" : "Балът за кандидатсване в ТУЕС е: МАТ(НВО) + БЕЛ(НВО) + ФИЗИКА(ГОДИШНА) + МАТ(ГОДИШНА)", "answer" : "False"},
+    "four" : { "question" : "ELSYS is paradise and hell", "answer" : "True"},
+    "five" : { "question" : "If you Google search 'askew', the content will tilt slightly to the right.", "answer" : "True"},
+    "six" : { "question" : "Students study in ELSYS for at least 6 years", "answer" : "True"},
+    "seven" : { "question" : "10 / 2 + 20 / 2 + 100 / 44= 30 / 2 + 20", "answer" : "False"},
+    "eight" : { "question" : "ТУЕС е основан през 1988г.", "answer" : "True"},
+    "nine" : { "question" : "Двете специалности в ТУЕС са Компютърни Мрежи и Системно Програмиране ", "answer" : "True"},
+    "ten" : { "question" : "Г-жа Стела Стефанова е само учител", "answer" : "False"},
+    "eleven" : { "question" : "In ELSYS the sleep in 11th grade becomes 1 hrs", "answer" : "True"},
+    "twelve" : { "question" : "2500 Students have graduated ELSYS", "answer" : "True"},
+    "thirteen" : { "question" : "HACKTues is organized by teachers for students", "answer" : "False"},
+    "fourteen" : { "question" : "ELSYS turns 30 years this year", "answer" : "True"},
+    "fifteen" : { "question" : "TUESFest е традиционото име на отворените врати на ТУЕС", "answer" : "False"},
+    "sixteen" : { "question" : "EE == BB", "answer" : "True"},
+    "seventeen" : { "question" : "ТУЕС е тясно интегриран с ТУ - София", }
 }
