@@ -15,5 +15,5 @@
     "fourteen" : { "question" : "ELSYS turns 30 years this year", "answer" : "True"},
     "fifteen" : { "question" : "TUESFest е традиционото име на отворените врати на ТУЕС", "answer" : "False"},
     "sixteen" : { "question" : "EE == BB", "answer" : "True"},
-    "seventeen" : { "question" : "ТУЕС е тясно интегриран с ТУ - София", }
+    "seventeen" : { "question" : "ТУЕС е тясно интегриран с ТУ - София", "answer" : "True" }
 }
