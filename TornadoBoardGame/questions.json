@@ -1,6 +1,6 @@
 {
     "one" : { "question" : "ТУЕС == Технологично Училище Електронни Системи", "answer" : "False"},
-    "two" : { "question" : "Учениците на ТУЕС прекарват най-много 5 часа в ТУЕС", "answer" : "True" },
+    "two" : { "qu estion" : "Учениците на ТУЕС прекарват най-много 5 часа в ТУЕС", "answer" : "True" },
     "three" : {"question" : "Балът за кандидатсване в ТУЕС е: МАТ(НВО) + БЕЛ(НВО) + ФИЗИКА(ГОДИШНА) + МАТ(ГОДИШНА)", "answer" : "False"},
     "four" : { "question" : "ELSYS is paradise and hell", "answer" : "True"},
     "five" : { "question" : "If you Google search 'askew', the content will tilt slightly to the right.", "answer" : "True"},
